@@ -82,7 +82,23 @@ async def dummy(ctx):
     """
     # Delete user message and print dummy table
     await ctx.message.delete()
-    await ctx.send(Formatter.construct_table(scraper.dummy_roster()))
+    await ctx.send(formatter.format_table(scraper.dummy_roster()))
+
+@bot.command()
+async def update(ctx):
+    """
+    Posts a dummy table.
+    :param ctx: Command context.
+    """
+    # Check if user is allowed to update the roster
+    if is_permitted(ctx.message.author):
+        # Post an updated roster
+        await ctx.send(formatter.format_roster(guild, scraper.parse_roster()))
+    else:
+        # Tell user they do not have a required role
+        await ctx.send(f'{ctx.message.author.mention} you do not have permission to update the roster!')
+    # Remove !update message
+    await ctx.message.delete()
 
 # Let it rip!
 bot.run(TOKEN)

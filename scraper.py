@@ -17,7 +17,7 @@ class PA_Scraper:
 
     def parse_roster(self):
         # Send a GET request to the URL
-        response = requests.get(url)
+        response = requests.get(self.url)
 
         # Create a BeautifulSoup object and specify the parser
         soup = BeautifulSoup(response.text, 'html.parser')
