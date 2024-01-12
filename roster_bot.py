@@ -18,6 +18,7 @@ intent_config.message_content = True
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 permitted_roles = [int(id) for id in os.getenv('PERMITTED_ROLE_IDS').split(',')]
+serviced_channels = [ch for ch in os.getenv('SERVICED_CHANNELS').split(',')]
 guild = os.getenv('GUILD_NAME')
 region = os.getenv('REGION')
 
@@ -42,6 +43,14 @@ def is_permitted(user):
     user_role_ids = [role.id for role in user.roles]
     return any(id in permitted_roles for id in user_role_ids)
 
+def is_serviced_channel(channel):
+    """
+    Checks if provided channel is serviced by bot.
+    :param channel: A Discord channel.
+    :return: Whether or not the channel is serviced by the bot.
+    """
+    return channel.name in serviced_channels
+
 # Define commands
 @bot.command()
 async def permission(ctx):
@@ -61,18 +70,19 @@ async def delete(ctx):
     Delete user message and notify.
     :param ctx: Command context.
     """
-    await ctx.message.delete()
-    await ctx.send(f'{ctx.message.author.mention} Your message has been deleted!')
+    if is_serviced_channel(ctx.channel) and is_permitted(ctx.message.author):
+        await ctx.message.delete()
+        await ctx.send(f'{ctx.message.author.mention} Your message has been deleted!')
 
 @bot.command()
 async def purge(ctx, n: int = 0):
     """
     Deletes latest n messages.
     :param ctx: Command context.
-    :param n: Number of messages to be purged.
+    :param n: Number of messages to be purged (1 - 50).
     """
     # Only permitted users are allowed to delete multiple messages
-    if is_permitted(ctx.author): await ctx.channel.purge(limit=n+1)
+    if is_permitted(ctx.author) and 0 < n < 50: await ctx.channel.purge(limit=n+1)
 
 @bot.command()
 async def dummy(ctx):
@@ -81,17 +91,18 @@ async def dummy(ctx):
     :param ctx: Command context.
     """
     # Delete user message and print dummy table
-    await ctx.message.delete()
-    await ctx.send(formatter.format_table(scraper.dummy_roster()))
+    if is_serviced_channel(ctx.channel) and is_permitted(ctx.message.author):
+        await ctx.message.delete()
+        await ctx.send(formatter.format_table(scraper.dummy_roster()))
 
 @bot.command()
 async def update(ctx):
     """
-    Posts a dummy table.
+    Updates the roster with the latest information.
     :param ctx: Command context.
     """
     # Check if user is allowed to update the roster
-    if is_permitted(ctx.message.author):
+    if is_permitted(ctx.message.author) and is_serviced_channel(ctx.channel):
         # Post an updated roster
         await ctx.send(formatter.format_roster(guild, scraper.parse_roster()))
     else:
