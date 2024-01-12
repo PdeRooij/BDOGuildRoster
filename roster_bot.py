@@ -47,9 +47,9 @@ def is_permitted(user):
 async def permission(ctx):
     # Check if user has any of the permitted roles (intersection of both lists)
     if is_permitted(ctx.message.author):
-        await ctx.send('Yes master.')
+        await ctx.reply('Yes master.')
     else:
-        await ctx.send('I will not obey you.')
+        await ctx.reply('I will not obey you.')
 
 @bot.command()
 async def greet(ctx):
