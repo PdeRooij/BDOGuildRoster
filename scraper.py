@@ -35,5 +35,5 @@ class PA_Scraper:
         else:
             raise Exception(f'Cannot find any members on {self.url}!')
 
-        def dummy_roster(self):
-            return ['Adventurer', 'Master', 'Member', 'Apprentice', 'Staff']
+    def dummy_roster(self):
+        return ['Adventurer', 'Master', 'Member', 'Apprentice', 'Staff']

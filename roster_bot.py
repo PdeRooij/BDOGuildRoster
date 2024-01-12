@@ -1,56 +1,88 @@
 #!/usr/bin/env python
-import asyncio
-
 from scraper import PA_Scraper
+from formatter import Formatter
 
-import sys          # Command line arguments
+# Reading environment variables
 import os
 from dotenv import load_dotenv
 
 # Discord stuff
 import discord
+from discord.ext import commands
 
+# Configure intents
+intent_config = discord.Intents.default()
+intent_config.message_content = True
 
-class RosterBot(discord.Client):
+# Load environment variables
+load_dotenv()
+TOKEN = os.getenv('DISCORD_TOKEN')
+permitted_roles = [int(id) for id in os.getenv('PERMITTED_ROLE_IDS').split(',')]
+guild = os.getenv('GUILD_NAME')
+region = os.getenv('REGION')
 
-    def __init__(self, arg_list=None, **kwargs):
-        # Configure intents
-        intent_config = discord.Intents.default()
-        intent_config.message_content = True
-        # Pass on arguments to super
-        super().__init__(intents=intent_config, **kwargs)
+# Prepare scraper and formatter
+scraper = PA_Scraper(guild, region)
+formatter = Formatter()
 
-        # Prepare scraper
-        scraper = PA_Scraper(arg_list[0], arg_list[1])
+# Initialise bot
+bot = commands.Bot(command_prefix='!', intents=intent_config)
 
-    async def on_ready(self):
-        print(f'{self.user.name} is alive!')
+@bot.event
+async def on_ready():
+    print(f'{bot.user.name} is alive!')
 
-    async def on_message(self, message):
-        # Do not handle own messages or messages outside the serviced channel
-        if message.author == bot.user or message.channel.name != os.getenv('SERVICED_CHANNEL'):
-            return
+def is_permitted(user):
+    """
+    Checks if provided user has a permitted role ID.
+    If so, the user is allowed to command the bot.
+    :param user: A Discord user.
+    :return: Whether or not a user is permitted to command the bot.
+    """
+    user_role_ids = [role.id for role in user.roles]
+    return any(id in permitted_roles for id in user_role_ids)
 
-        if '!greet' in message.content.lower():
-            # Test by greeting user who sent command
-            await message.channel.send(f'Hi {message.author}!')
-
-        if '!delete' in message.content.lower():
-            # Delete user message and notify
-            channel = message.channel
-            await message.delete()
-            await channel.send('You have been deleted!')
-
-
-# If executed, awaken Pie Bot
-if __name__ == '__main__':
-    load_dotenv()
-    TOKEN = os.getenv('DISCORD_TOKEN')
-    guild = os.getenv('GUILD_NAME')
-    region = os.getenv('REGION')
-    # Pass command line arguments if provided
-    if len(sys.argv) > 1:
-        bot = RosterBot(sys.argv[1:], command_prefix='!')
+# Define commands
+@bot.command()
+async def permission(ctx):
+    # Check if user has any of the permitted roles (intersection of both lists)
+    if is_permitted(ctx.message.author):
+        await ctx.send('Yes master.')
     else:
-        bot = RosterBot([guild, region], command_prefix='!')
-    bot.run(TOKEN)
+        await ctx.send('I will not obey you.')
+
+@bot.command()
+async def greet(ctx):
+    await ctx.send(f'Hi {ctx.message.author.mention}!')
+
+@bot.command()
+async def delete(ctx):
+    """
+    Delete user message and notify.
+    :param ctx: Command context.
+    """
+    await ctx.message.delete()
+    await ctx.send(f'{ctx.message.author.mention} Your message has been deleted!')
+
+@bot.command()
+async def purge(ctx, n: int = 0):
+    """
+    Deletes latest n messages.
+    :param ctx: Command context.
+    :param n: Number of messages to be purged.
+    """
+    # Only permitted users are allowed to delete multiple messages
+    if is_permitted(ctx.author): await ctx.channel.purge(limit=n+1)
+
+@bot.command()
+async def dummy(ctx):
+    """
+    Posts a dummy table.
+    :param ctx: Command context.
+    """
+    # Delete user message and print dummy table
+    await ctx.message.delete()
+    await ctx.send(Formatter.construct_table(scraper.dummy_roster()))
+
+# Let it rip!
+bot.run(TOKEN)
