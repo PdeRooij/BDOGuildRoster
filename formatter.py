@@ -68,3 +68,16 @@ class Formatter:
         if len(joined) > 0:
             message += f'{len(joined)} families joined:\n{self.format_table(joined, columns=2)}\n'
         return message
+
+    def format_alias(self, disc_name, family):
+        """
+        Turns provided alias into a readable message
+        :param disc_name:
+        :param family:
+        :return: Message about alias found.
+        """
+        # If an alias is found, print family and Discord name
+        if disc_name:
+            return f'Family {family} is known as {disc_name} on the Discord server.'
+        else:
+            return f'Could not find an alias for family {family}!'

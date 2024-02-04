@@ -46,5 +46,41 @@ class Sage:
         self.db.close_connection()
         return roster_changes
 
+    def replace_alias(self, family, disc_name):
+        """
+        Replaces or adds alias to the database.
+
+        :param family: In-game family name.
+        :param disc_name: Discord name.
+        """
+        # Connect to the database and replace/add alias
+        self.db.create_connection()
+        self.db.replace_alias(family, disc_name)
+        self.db.close_connection()
+
+    def remove_alias(self, disc_name):
+        """
+        Removes alias from the database.
+
+        :param disc_name: Discord name.
+        """
+        # Connect to the database and replace/add alias
+        self.db.create_connection()
+        self.db.remove_alias(disc_name)
+        self.db.close_connection()
+
+    def find_alias(self, family):
+        """
+        Attempts to find a discord name for given family name.
+
+        :param family: In-game family name.
+        """
+        # Connect to the database and replace/add alias
+        self.db.create_connection()
+        alias = self.db.find_alias(family)
+        self.db.close_connection()
+        if alias:
+            return alias[0]
+
     def dummy_roster_change(self):
         return [('left', 'old_member'), ('left', 'kicked'), ('joined', 'nice_person')]

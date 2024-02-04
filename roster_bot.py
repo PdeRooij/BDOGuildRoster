@@ -158,5 +158,44 @@ async def disk_update(ctx):
     # Remove !update message
     await ctx.message.delete()
 
+@bot.command()
+async def alias(ctx, *args):
+    """
+    Allows adding and removing aliases.
+    :param ctx: Command context.
+    :param args: Arguments passed to the command. Can be names/aliases or the keyword remove.
+    """
+    # Only perform operation in serviced channels
+    if is_serviced_channel(ctx.channel):
+        # Anybody is allowed to add or remove their own alias
+        if len(args) == 1:
+            # If only one argument is provided, the user wishes to either add or remove their own alias
+            if args[0] == 'remove':
+                sage.remove_alias(ctx.message.author.name)
+            else:
+                sage.replace_alias(args[0], ctx.message.author.name)
+        # Adding/removing aliases for others is only allowed for permitted roles
+        elif is_permitted(ctx.message.author):
+            if len(args) == 2:
+                if args[0] == 'remove':
+                    # Remove alias(es) of provided Discord user
+                    sage.remove_alias(args[1])
+                else:
+                    # Add/replace alias of provided Discord user
+                    sage.replace_alias(args[1], args[0])
+
+    # Delete message from user
+    await ctx.message.delete()
+
+@bot.command()
+async def whois(ctx, alias):
+    """
+    Looks up alias in database.
+    :param ctx: Command context.
+    :param alias: Name to look for.
+    """
+    if is_serviced_channel(ctx.channel):
+        await ctx.reply(formatter.format_alias(sage.find_alias(alias), alias))
+
 # Let it rip!
 bot.run(TOKEN)
