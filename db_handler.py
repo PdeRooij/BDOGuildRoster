@@ -165,15 +165,15 @@ class DB_Handler:
         # Execute and commit insert
         self.execute_commit(sql, values)
 
-    def remove_alias(self, family):
+    def remove_alias(self, disc_name):
         """
         Delete an alias from the family_to_discord table
 
         Args:
-            family (str): family name of the deleted alias
+            disc_name (str): discord name of the deleted alias
         """
         # Execute and commit delete
-        self.execute_commit(f"DELETE FROM family_to_discord WHERE family='{family}'")
+        self.execute_commit(f"DELETE FROM family_to_discord WHERE discord_name='{disc_name}'")
 
     def find_alias(self, family):
         """ Retrieves stored alias for a specified family.
