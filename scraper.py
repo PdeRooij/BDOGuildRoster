@@ -14,13 +14,21 @@ class PA_Scraper:
         self.sessy = requests.Session()  # Initialise session
         # URL of the webpage to scrape
         self.url = f'https://www.naeu.playblackdesert.com/en-US/Adventure/Guild/GuildProfile?guildName={guild}&region={region}'
+        # Holder for response
+        self.response = None
 
-    def parse_roster(self):
-        # Send a GET request to the URL
-        response = requests.get(self.url)
+    def parse_roster(self, html_loc=None):
+        # Differentiate between reading html from disk or actually scraping it from the website
+        if html_loc:
+            # Read HTML from disk
+            with open(html_loc) as html_file:
+                soup = BeautifulSoup(html_file, 'html.parser')
+        else:
+            # Send a GET request to the URL
+            self.response = requests.get(self.url)
 
-        # Create a BeautifulSoup object and specify the parser
-        soup = BeautifulSoup(response.text, 'html.parser')
+            # Create a BeautifulSoup object and specify the parser
+            soup = BeautifulSoup(self.response.text, 'html.parser')
 
         # Find the table (ul) of members by selecting it by class (adventure_list_table)
         members = soup.select('.adventure_list_table li div span .text a')

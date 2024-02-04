@@ -24,6 +24,7 @@ serviced_channels = [ch for ch in os.getenv('SERVICED_CHANNELS').split(',')]
 guild = os.getenv('GUILD_NAME')
 region = os.getenv('REGION')
 db_loc = os.getenv('DB')
+roster_loc = f'{guild}_roster.html'
 
 # Prepare scraper, logic and formatter
 scraper = PA_Scraper(guild, region)
@@ -129,10 +130,31 @@ async def update(ctx):
     # Check if user is allowed to update the roster
     if is_permitted(ctx.message.author) and is_serviced_channel(ctx.channel):
         # Post an updated roster
-        await ctx.send(formatter.format_roster(guild, scraper.parse_roster()))
+        cur_members = scraper.parse_roster()
+        await ctx.send(formatter.format_roster(guild, cur_members))
+        # Post roster changes
+        changes = sage.compare_guild_members(cur_members)
+        await ctx.send(formatter.format_roster_changes(guild, sage.last_update, changes))
     else:
         # Tell user they do not have a required role
         await ctx.send(f'{ctx.message.author.mention} you do not have permission to update the roster!')
+    # Remove !update message
+    await ctx.message.delete()
+
+@bot.command()
+async def disk_update(ctx):
+    """
+    Updates the roster from HTML stored on disk.
+    :param ctx: Command context.
+    """
+    # Only admins may execute this command
+    if is_admin(ctx.message.author) and is_serviced_channel(ctx.channel):
+        # Post an updated roster read from disk
+        cur_members = scraper.parse_roster(roster_loc)
+        await ctx.send(formatter.format_roster(guild, cur_members))
+        # Post roster changes
+        changes = sage.compare_guild_members(cur_members)
+        await ctx.send(formatter.format_roster_changes(guild, sage.last_update, changes))
     # Remove !update message
     await ctx.message.delete()
 
