@@ -27,6 +27,7 @@ class Sage:
         """
         # Connect to the database and update
         self.db.create_connection()
+        self.last_update = self.db.get_last_update()
         self.db.update_last_update()
 
         # Initialise list of changes and retrieve old roster from database
