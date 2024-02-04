@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 from scraper import PA_Scraper
 from formatter import Formatter
+from sage import Sage
 
 # Reading environment variables
 import os
@@ -21,9 +22,11 @@ permitted_roles = [int(id) for id in os.getenv('PERMITTED_ROLE_IDS').split(',')]
 serviced_channels = [ch for ch in os.getenv('SERVICED_CHANNELS').split(',')]
 guild = os.getenv('GUILD_NAME')
 region = os.getenv('REGION')
+db_loc = os.getenv('DB')
 
-# Prepare scraper and formatter
+# Prepare scraper, logic and formatter
 scraper = PA_Scraper(guild, region)
+sage = Sage(db_loc)
 formatter = Formatter()
 
 # Initialise bot
@@ -52,7 +55,7 @@ def is_serviced_channel(channel):
     return channel.name in serviced_channels
 
 # Define commands
-@bot.command()
+@bot.command(name='permit?')
 async def permission(ctx):
     # Check if user has any of the permitted roles (intersection of both lists)
     if is_permitted(ctx.message.author):
@@ -85,15 +88,19 @@ async def purge(ctx, n: int = 0):
     if is_permitted(ctx.author) and 0 < n < 50: await ctx.channel.purge(limit=n+1)
 
 @bot.command()
-async def dummy(ctx):
+async def dummy(ctx, entity):
     """
     Posts a dummy table.
     :param ctx: Command context.
+    :param entity: What dummy object to display.
     """
     # Delete user message and print dummy table
     if is_serviced_channel(ctx.channel) and is_permitted(ctx.message.author):
         await ctx.message.delete()
-        await ctx.send(formatter.format_table(scraper.dummy_roster()))
+        if entity == 'roster':
+            await ctx.send(formatter.format_roster('dummy_guild', scraper.dummy_roster()))
+        if entity == 'changes':
+            await ctx.send(formatter.format_roster_changes('dummy_guild', '0000-00-00 00:00:00', sage.dummy_roster_change()))
 
 @bot.command()
 async def update(ctx):

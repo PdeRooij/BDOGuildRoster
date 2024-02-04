@@ -44,3 +44,27 @@ class Formatter:
 
     def format_roster(self, guild, members):
         return f'Players currently in {guild}:\n{self.format_table(members, columns=6)}'
+
+    def format_roster_changes(self, guild, last_update, changes):
+        """
+
+        :param guild:
+        :param changes:
+        :return:
+        """
+        # If there are no changes, display so
+        if not changes:
+            return f'No roster changes in {guild} since {last_update}.'
+
+        # Split changes into members who left and who joined
+        left = []
+        joined = []
+        [left.append(change[1]) if change[0] == 'left' else joined.append(change[1]) for change in changes]
+
+        # Construct message and give back
+        message = f'{guild} roster changes since {last_update}:\n'
+        if len(left) > 0:
+            message += f'{len(left)} families left:\n{self.format_table(left, columns=2)}\n'
+        if len(joined) > 0:
+            message += f'{len(joined)} families joined:\n{self.format_table(joined, columns=2)}\n'
+        return message

@@ -9,4 +9,5 @@
 pyvenv.cfg
 .venv
 .env
+*.db
 pip-selfcheck.json
