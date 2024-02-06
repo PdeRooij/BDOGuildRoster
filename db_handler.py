@@ -172,8 +172,8 @@ class DB_Handler:
         Args:
             disc_name (str): discord name of the deleted alias
         """
-        # Execute and commit delete (unfortunately author.name delivers lower case names...)
-        self.execute_commit(f"DELETE FROM family_to_discord WHERE LOWER(discord_name)='{disc_name.lower()}'")
+        # Execute and commit delete
+        self.execute_commit(f"DELETE FROM family_to_discord WHERE discord_name='{disc_name}'")
 
     def find_alias(self, family):
         """ Retrieves stored alias for a specified family.

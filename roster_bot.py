@@ -87,6 +87,12 @@ async def greet(ctx):
     await ctx.send(f'Hi {ctx.message.author.mention}!')
 
 @bot.command()
+async def name(ctx):
+    if is_serviced_channel(ctx.channel):
+        await ctx.send(f'Your name is {ctx.message.author.display_name} (message deleted after 3 seconds)', delete_after=3.0)
+        await ctx.message.delete()
+
+@bot.command()
 async def delete(ctx):
     """
     Delete user message and notify.
@@ -171,9 +177,9 @@ async def alias(ctx, *args):
         if len(args) == 1:
             # If only one argument is provided, the user wishes to either add or remove their own alias
             if args[0] == 'remove':
-                sage.remove_alias(ctx.message.author.name)
+                sage.remove_alias(ctx.message.author.display_name)
             else:
-                sage.replace_alias(args[0], ctx.message.author.name)
+                sage.replace_alias(args[0], ctx.message.author.display_name)
         # Adding/removing aliases for others is only allowed for permitted roles
         elif is_permitted(ctx.message.author):
             if len(args) == 2:
