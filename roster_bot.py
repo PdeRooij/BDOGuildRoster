@@ -65,6 +65,16 @@ def is_serviced_channel(channel):
     """
     return channel.name in serviced_channels
 
+async def remove_previous_roster(channel):
+    """
+    Deletes a previously posted roster from the provided channel
+    :param channel: A Discord channel.
+    """
+    # Loop through last five messages and delete a message if it starts with the roster line
+    async for message in channel.history(limit=5):
+        if message.content.startswith('Players currently in'):
+            await message.delete()
+
 # Define commands
 @bot.command(name='permit?')
 async def permission(ctx):
@@ -110,7 +120,7 @@ async def purge(ctx, n: int = 0):
     :param n: Number of messages to be purged (1 - 50).
     """
     # Only permitted users are allowed to delete multiple messages
-    if is_permitted(ctx.author) and 0 < n < 50: await ctx.channel.purge(limit=n+1)
+    if is_permitted(ctx.author) and is_serviced_channel(ctx.channel) and 0 < n < 50: await ctx.channel.purge(limit=n+1)
 
 @bot.command()
 async def dummy(ctx, entity):
@@ -135,6 +145,8 @@ async def update(ctx):
     """
     # Check if user is allowed to update the roster
     if is_permitted(ctx.message.author) and is_serviced_channel(ctx.channel):
+        # Remove the previous roster
+        await remove_previous_roster(ctx.channel)
         # Post an updated roster
         cur_members = scraper.parse_roster()
         await ctx.send(formatter.format_roster(guild, cur_members))
@@ -155,6 +167,8 @@ async def disk_update(ctx):
     """
     # Only admins may execute this command
     if is_admin(ctx.message.author) and is_serviced_channel(ctx.channel):
+        # Remove the previous roster
+        await remove_previous_roster(ctx.channel)
         # Post an updated roster read from disk
         cur_members = scraper.parse_roster(roster_loc)
         await ctx.send(formatter.format_roster(guild, cur_members))
@@ -201,7 +215,11 @@ async def whois(ctx, alias):
     :param alias: Name to look for.
     """
     if is_serviced_channel(ctx.channel):
-        await ctx.reply(formatter.format_alias(sage.find_alias(alias), alias))
+        if alias.startswith('<@'):
+            # Search by mention implies somebody is looking for an alias by Discord name
+            await ctx.reply('I do not support searching by Discord name yet. :(')
+        else:
+            await ctx.reply(formatter.format_alias(sage.find_alias(alias), alias))
 
 # Let it rip!
 bot.run(TOKEN)
