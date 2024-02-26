@@ -43,7 +43,16 @@ class Formatter:
         return f"```{print_table}```"
 
     def format_roster(self, guild, members):
-        return f'Players currently in {guild}:\n{self.format_table(members, columns=6)}'
+        """
+        Returns a printable roster.
+
+        :param guild: Guild name.
+        :param members: List of (name, fammily_page) tuples of all members in the guild.
+        :return: Printable roster of provided guild.
+        """
+        # Members is a list of (name, family_page) tuples. We only print name on a roster.
+        names = [member[0] for member in members]
+        return f'Players currently in {guild}:\n{self.format_table(names, columns=6)}'
 
     def format_roster_changes(self, guild, last_update, changes):
         """

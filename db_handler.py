@@ -98,18 +98,19 @@ class DB_Handler:
         """
         self.replace_variable('last_update', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
-    def add_guild_member(self, member, rank=None):
+    def add_guild_member(self, member, rank=None, family_page=None):
         """
         Add a (new) family to the guild_members table
 
         Args:
             member (str): family name of the added member
             rank (str): guild rank of the added member
+            family_page (str): webpage with family information
         """
         # Construct sql statement and corresponding values
-        sql = """INSERT INTO guild_members(family, rank)
-                  VALUES(?,?)"""
-        values = (member, rank)
+        sql = """INSERT INTO guild_members(family, rank, family_page)
+                  VALUES(?,?,?)"""
+        values = (member, rank, family_page)
 
         # Execute and commit insert
         self.execute_commit(sql, values)
@@ -201,7 +202,7 @@ class DB_Handler:
         cur = self.connection.cursor()
         cur.execute(query)
 
-        # Returns list of rows, where is row is a  dictionary with column names as keys and corresponding values
+        # Returns list of rows, where row is a dictionary with column names as keys and corresponding values
         return cur.fetchall()
 
     def dump(self, dump_file):

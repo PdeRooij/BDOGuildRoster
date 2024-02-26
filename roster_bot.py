@@ -74,6 +74,7 @@ async def remove_previous_roster(channel):
     async for message in channel.history(limit=5):
         if message.content.startswith('Players currently in'):
             await message.delete()
+            return  # No need to loop further
 
 # Define commands
 @bot.command(name='permit?')

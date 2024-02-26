@@ -22,9 +22,12 @@ class Sage:
         """
         Checks if there are changes to the roster since last update.
 
-        :param new_roster: List of all families currently in the guild.
+        :param new_roster: List of all families (in name, page tuples) currently in the guild.
         :return: List of all changes to the roster since last update.
         """
+        # Extract names from (name, family_page) tuples for comparison
+        new_names = [family[0] for family in new_roster]
+
         # Connect to the database and update
         self.db.create_connection()
         self.last_update = self.db.get_last_update()
@@ -32,13 +35,13 @@ class Sage:
 
         # Initialise list of changes and retrieve old roster from database
         roster_changes = []
-        old_roster = self.db.get_all_guild_members()
+        old_names = self.db.get_all_guild_members()
         # Add new members to the database and change list
-        for new_member in [family for family in new_roster if family not in old_roster]:
-            self.db.add_guild_member(new_member)
+        for new_member in [family for family in new_roster if family[0] not in old_names]:
+            self.db.add_guild_member(new_member[0], family_page=new_member[1])
             roster_changes.append(('joined', new_member))
         # Delete old members from the database and add to change list
-        for old_member in [family for family in old_roster if family not in new_roster]:
+        for old_member in [family for family in old_names if family not in new_names]:
             self.db.remove_guild_member(old_member)
             roster_changes.append(('left', old_member))
 

@@ -32,14 +32,11 @@ class PA_Scraper:
 
         # Find the table (ul) of members by selecting it by class (adventure_list_table)
         members = soup.select('.adventure_list_table li div span .text a')
-        names = [member.text.strip() for member in members]
 
         # Check if the table was found
         if members:
-            # Extract the names and return those
-            names = [member.text.strip() for member in members]
-            return names
-
+            # Extract (name, link to family page) tuples and return those
+            return [(member.text.strip(), member['href']) for member in members]
         else:
             raise Exception(f'Cannot find any members on {self.url}!')
 
