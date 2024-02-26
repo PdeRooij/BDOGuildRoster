@@ -90,3 +90,17 @@ class Formatter:
             return f'Family {family} is known as {disc_name} on the Discord server.'
         else:
             return f'Could not find an alias for family {family}!'
+
+    def format_family_page(self, family, page):
+        """
+        Turns provided family page into a readable message
+
+        :param family: Family name.
+        :param page: Link to family page.
+        :return: Message with link to requested family's page if available. Could not find if not.
+        """
+        # If an alias is found, print family and Discord name
+        if page:
+            return f"[{family}'s webpage]({page})"
+        else:
+            return f'Could not find a page for family {family}!'

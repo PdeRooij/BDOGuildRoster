@@ -222,5 +222,19 @@ async def whois(ctx, alias):
         else:
             await ctx.reply(formatter.format_alias(sage.find_alias(alias), alias))
 
+@bot.command()
+async def page(ctx, family):
+    """
+    Retrieves webpage of provided family.
+    :param ctx: Command context.
+    :param family: Family name to find webpage for.
+    """
+    if is_serviced_channel(ctx.channel):
+        if family.startswith('<@'):
+            # Search by mention implies somebody is looking for a family by Discord name
+            await ctx.reply('I do not support searching by Discord name yet. :(')
+        else:
+            await ctx.reply(formatter.format_family_page(family, sage.find_page(family)))
+
 # Let it rip!
 bot.run(TOKEN)

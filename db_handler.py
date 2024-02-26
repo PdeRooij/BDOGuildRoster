@@ -190,6 +190,20 @@ class DB_Handler:
         # Return Discord name if found, otherwise None
         return cur.fetchone()
 
+    def find_page(self, family):
+        """ Retrieves stored webpage for a specified family.
+
+        Args:
+            family (str): Family name to search.
+        Returns:
+            Webpage (str) with family information if found, otherwise None.
+        """
+        cur = self.connection.cursor()
+        cur.execute(f"SELECT family_page FROM guild_members WHERE family = '{family}'")
+
+        # Return webpage if found, otherwise None
+        return cur.fetchone()
+
     def query(self, query):
         """ A debugging function for executing any sql statement on the database.
 

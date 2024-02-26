@@ -78,12 +78,25 @@ class Sage:
 
         :param family: In-game family name.
         """
-        # Connect to the database and replace/add alias
+        # Connect to the database and search for alias
         self.db.create_connection()
         alias = self.db.find_alias(family)
         self.db.close_connection()
         if alias:
             return alias[0]
+
+    def find_page(self, family):
+        """
+        Attempts to find a webpage for given family name.
+
+        :param family: In-game family name.
+        """
+        # Connect to the database and search for page
+        self.db.create_connection()
+        page = self.db.find_page(family)
+        self.db.close_connection()
+        if page:
+            return page[0]
 
     def dummy_roster_change(self):
         return [('left', 'old_member'), ('left', 'kicked'), ('joined', 'nice_person')]
