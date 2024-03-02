@@ -39,7 +39,7 @@ class Sage:
         # Add new members to the database and change list
         for new_member in [family for family in new_roster if family[0] not in old_names]:
             self.db.add_guild_member(new_member[0], family_page=new_member[1])
-            roster_changes.append(('joined', new_member))
+            roster_changes.append(('joined', new_member[0]))
         # Delete old members from the database and add to change list
         for old_member in [family for family in old_names if family not in new_names]:
             self.db.remove_guild_member(old_member)
