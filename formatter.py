@@ -73,9 +73,15 @@ class Formatter:
         # Construct message and give back
         message = f'{guild} roster changes since {last_update}:\n'
         if len(left) > 0:
-            message += f'{len(left)} families left:\n{self.format_table(left, columns=2)}\n'
+            if len(left) == 1:
+                message += f'{len(left)} family left:\n```{left[0]}```\n'
+            else:
+                message += f'{len(left)} families left:\n{self.format_table(left, columns=2)}\n'
         if len(joined) > 0:
-            message += f'{len(joined)} families joined:\n{self.format_table(joined, columns=2)}\n'
+            if len(joined) == 1:
+                message += f'{len(joined)} family joined:\n```{joined[0]}```\n'
+            else:
+                message += f'{len(joined)} families joined:\n{self.format_table(joined, columns=2)}\n'
         return message
 
     def format_alias(self, disc_name, family):
