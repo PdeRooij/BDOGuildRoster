@@ -144,6 +144,9 @@ async def update(ctx):
     Updates the roster with the latest information.
     :param ctx: Command context.
     """
+    # Remove !update message
+    await ctx.message.delete()
+
     # Check if user is allowed to update the roster
     if is_permitted(ctx.message.author) and is_serviced_channel(ctx.channel):
         # Remove the previous roster
@@ -157,8 +160,6 @@ async def update(ctx):
     else:
         # Tell user they do not have a required role
         await ctx.send(f'{ctx.message.author.mention} you do not have permission to update the roster!')
-    # Remove !update message
-    await ctx.message.delete()
 
 @bot.command()
 async def disk_update(ctx):
